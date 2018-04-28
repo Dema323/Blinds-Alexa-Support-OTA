@@ -17,35 +17,52 @@ WidgetTerminal terminal(V8);
 WidgetRTC rtc;
 
 int eventTime;
+int eventStart;
+int eventStop;
+int travelTime = 31000;
+bool init_status = false;
+String currentTime;
+int standTime = 31;
 
 void StartUp();
 void StopUp();
 void StartDown();
 void StopDown();
-void WriteVirtual();
+void StartInit();
 
 void StartUp(){
-  eventTime = huidige tijd
-  String currentTime = String(hour()) + ":" + minute() + ":" + second() + " - Started moving up";
-  terminal.println(currentTime);
-  terminal.flush();
+  eventStart = now();
 }
 
 void StopUp(){
-  String currentTime = String(hour()) + ":" + minute() + ":" + second() + " - Stopped moving up";
-  terminal.println(currentTime);
+  eventStop = now();
+  eventTime = eventStop - eventStart;
+  standTime = standTime + eventTime;
+  if(standTime > 31){
+    standTime = 31;
+  }
+  double procent = (double)standTime/31;
+  currentTime = String(hour()) + ":" + minute() + ":" + second();
+  Blynk.virtualWrite(V10, procent);
+  terminal.println("Open at " + String(procent) +  " procent ");
   terminal.flush();
 }
 
 void StartDown(){
-  String currentTime = String(hour()) + ":" + minute() + ":" + second() + " - Started moving down";
-  terminal.println(currentTime);
-  terminal.flush();
+  eventStart = now();
 }
 
 void StopDown(){
-  String currentTime = String(hour()) + ":" + minute() + ":" + second() + " - Stopped moving down";
-  terminal.println(currentTime);
+  eventStop = now();
+  eventTime = eventStop - eventStart;
+  standTime = standTime - eventTime;
+  if(standTime < 0){
+    standTime = 0;
+  }
+  double procent = (double)standTime/31;
+  currentTime = String(hour()) + ":" + minute() + ":" + second();
+  Blynk.virtualWrite(V10, procent);
+  terminal.println("Open at " + String(procent) +  " procent ");
   terminal.flush();
 }
 
@@ -85,12 +102,19 @@ BLYNK_WRITE(V2) //DOWN
  }
  }
 
- void WriteVirtual(){
-   Blynk.virtualWrite(V10, 25);
- }
+void StartInit(){
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
+  delay(500);
+  digitalWrite(12, HIGH);
+  delay(30000);
+  digitalWrite(12, LOW);
+  init_status = false;
+  }
 
 void setup()
 {
+  init_status = true;
   setSyncInterval(1);
   WiFi.mode(WIFI_STA);
   Blynk.begin(auth, ssid, pass);
@@ -100,14 +124,20 @@ void setup()
   setSyncInterval(900000);
   ArduinoOTA.begin();
   rtc.begin();
-  timer.setInterval(500, WriteVirtual);
-  terminal.println("Device online");
+  Blynk.virtualWrite(V8, "clr");
+  StartInit();
+  currentTime = String(hour()) + ":" + minute() + ":" + second();
+  terminal.println(" " + currentTime + " - Blinds to default ");
   terminal.flush();
+  Blynk.virtualWrite(V10, 100);
 }
 void loop()
 {
   Blynk.run();
   ArduinoOTA.handle();
   timer.run();
+  if(init_status == true){
+
+  }
 
 }
