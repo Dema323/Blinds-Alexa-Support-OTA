@@ -44,7 +44,7 @@ void StopUp(){
   double procent = (double)standTime/30;
   currentTime = String(hour()) + ":" + minute() + ":" + second();
   Blynk.virtualWrite(V10, procent);
-  terminal.println(currentTime + " - Open at " + String(procent) +  " procent ");
+  terminal.println(currentTime + " - Blinds at " + String(procent) +  " pr. ");
   terminal.flush();
 }
 
@@ -62,7 +62,7 @@ void StopDown(){
   double procent = (double)standTime/30;
   currentTime = String(hour()) + ":" + minute() + ":" + second();
   Blynk.virtualWrite(V10, procent);
-  terminal.println(currentTime + " - Open at " + String(procent) +  " procent ");
+  terminal.println(currentTime + " - Blinds at " + String(procent) +  " pr. ");
   terminal.flush();
 }
 
@@ -118,9 +118,6 @@ void setup()
   setSyncInterval(1);
   WiFi.mode(WIFI_STA);
   Blynk.begin(auth, ssid, pass);
-  while (Blynk.connect() == false) {
-    delay(1000);
-  }
   setSyncInterval(900000);
   ArduinoOTA.begin();
   rtc.begin();
@@ -130,7 +127,8 @@ void setup()
     delay(1000);
   }
   currentTime = String(hour()) + ":" + minute() + ":" + second();
-  terminal.println(currentTime + " - Blinds to default ");
+  terminal.println(currentTime + " - ESP came online. ");
+  terminal.println(currentTime + " - Blinds to default. ");
   terminal.flush();
   double procent = (double)standTime/30;
   Blynk.virtualWrite(V10, procent);
