@@ -22,7 +22,7 @@ int eventStop;
 int travelTime = 31000;
 bool init_status = false;
 String currentTime;
-int standTime = 31;
+int standTime = 30;
 
 void StartUp();
 void StopUp();
@@ -38,13 +38,13 @@ void StopUp(){
   eventStop = now();
   eventTime = eventStop - eventStart;
   standTime = standTime + eventTime;
-  if(standTime > 31){
-    standTime = 31;
+  if(standTime > 30){
+    standTime = 30;
   }
-  double procent = (double)standTime/31;
+  double procent = (double)standTime/30;
   currentTime = String(hour()) + ":" + minute() + ":" + second();
   Blynk.virtualWrite(V10, procent);
-  terminal.println("Open at " + String(procent) +  " procent ");
+  terminal.println(currentTime + " - Open at " + String(procent) +  " procent ");
   terminal.flush();
 }
 
@@ -59,10 +59,10 @@ void StopDown(){
   if(standTime < 0){
     standTime = 0;
   }
-  double procent = (double)standTime/31;
+  double procent = (double)standTime/30;
   currentTime = String(hour()) + ":" + minute() + ":" + second();
   Blynk.virtualWrite(V10, procent);
-  terminal.println("Open at " + String(procent) +  " procent ");
+  terminal.println(currentTime + " - Open at " + String(procent) +  " procent ");
   terminal.flush();
 }
 
@@ -126,10 +126,14 @@ void setup()
   rtc.begin();
   Blynk.virtualWrite(V8, "clr");
   StartInit();
+  while (Blynk.connect() == false) {
+    delay(1000);
+  }
   currentTime = String(hour()) + ":" + minute() + ":" + second();
-  terminal.println(" " + currentTime + " - Blinds to default ");
+  terminal.println(currentTime + " - Blinds to default ");
   terminal.flush();
-  Blynk.virtualWrite(V10, 100);
+  double procent = (double)standTime/30;
+  Blynk.virtualWrite(V10, procent);
 }
 void loop()
 {
