@@ -6,42 +6,63 @@
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 
-char auth[] = "xxxxx";
+char auth[] = "c1b5ca348c734e5fabd12fb4cceba4b2";
 
-char ssid[] = "xxxxx";
-char pass[] = "xxxxx";
+char ssid[] = "WiFi-2.4-D4F0";
+char pass[] = "A26YXkP73nuz";
 
+BlynkTimer timer;
 
-BLYNK_WRITE(V2)
+int Height;
+
+void UPHeightCounter();
+void DOWNHeightCounter();
+void WriteVirtual();
+
+void UPHeightCounter(){
+  Height++;
+}
+
+void DOWNHeightCounter(){
+  Height--;
+}
+
+BLYNK_WRITE(V2) //DOWN
 {
  if (param.asInt()){
-  digitalWrite(D5, LOW);
+  digitalWrite(12, LOW);
   Blynk.virtualWrite(V3, LOW);
   delay(1000);
-  digitalWrite(D1, HIGH);
+  digitalWrite(13, HIGH);
+  timer.setInterval(1000, DOWNHeightCounter);
  }else{
-  digitalWrite(D1, LOW);
+  digitalWrite(13, LOW);
  }
  }
- BLYNK_WRITE(V3)
+ BLYNK_WRITE(V3) //UP
  {
    if (param.asInt()){
-  digitalWrite(D1, LOW);
+  digitalWrite(13, LOW);
   Blynk.virtualWrite(V2, LOW);
   delay(1000);
-  digitalWrite(D5, HIGH);
+  digitalWrite(12, HIGH);
+  timer.setInterval(1000, UPHeightCounter);
  }else{
-  digitalWrite(D5, LOW);
+  digitalWrite(12, LOW);
  }
  }
   BLYNK_WRITE(V4)
    {
      if (param.asInt()){
-  digitalWrite(D5, LOW);
+  digitalWrite(12, LOW);
+  digitalWrite(13, LOW);
   Blynk.virtualWrite(V2, LOW);
   Blynk.virtualWrite(V3, LOW);
-  digitalWrite(D1, LOW);
  }
+ }
+
+ void WriteVirtual(){
+   Blynk.virtualWrite(V10, Height);
  }
 
 void setup()
@@ -50,11 +71,11 @@ void setup()
   Blynk.begin(auth, ssid, pass);
   while (Blynk.connect() == false) {}
   ArduinoOTA.begin();
+  timer.setInterval(500, WriteVirtual);
 }
 void loop()
 {
   Blynk.run();
   ArduinoOTA.handle();
-
+  timer.run();
 }
-//
